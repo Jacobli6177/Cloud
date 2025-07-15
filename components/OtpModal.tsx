@@ -11,7 +11,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 
-const OPTModal = () => {
+const OtpModal = () => {
   return (
    <AlertDialog>
   <AlertDialogTrigger>Open</AlertDialogTrigger>
@@ -32,4 +32,4 @@ const OPTModal = () => {
   )
 }
 
-export default OPTModal
+export default OtpModal
