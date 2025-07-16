@@ -1,25 +1,25 @@
+'use client';
+
 import React, { useState } from 'react'
 import {
   AlertDialog,
   AlertDialogAction,
-  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 
 import {
   InputOTP,
   InputOTPGroup,
-  InputOTPSeparator,
   InputOTPSlot,
 } from "@/components/ui/input-otp"
 import Image from 'next/image';
 import { Button } from './ui/button';
-
+import { verifySecret, sendEmailOTP } from '@/lib/actions/user.actions';
+import { useRouter } from 'next/navigation';
 const OtpModal = ({
   accountId,
   email,
@@ -84,9 +84,9 @@ const OtpModal = ({
             {isLoading && <Image src="/assets/icons/loader.svg" alt="loader" width={24} height={24} className='ml-2 animate-spin'/>}
           </AlertDialogAction>
 
-          <div>
-            Didn't get a code ?
-            <Button type='button' variant="link" className='pl-1 text-brand' onClick={handleResendOtp()}>
+          <div className='subtitle-2 mt-2 text-center text-light-100'>
+            Didn&apos;t get a code ?
+            <Button type='button' variant="link" className='pl-1 text-brand' onClick={handleResendOtp}>
               Click to resend
             </Button>
           </div>
