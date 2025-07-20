@@ -14,10 +14,10 @@ interface Props {
 
 const FileUploader = ({ownerId, accountId, className}: Props) => {
   const [files, setFiles] = useState<File[]>([]);
-
-  const onDrop = useCallback(acceptedFiles => {
-  }, [])
-  const {getRootProps, getInputProps, isDragActive} = useDropzone({onDrop})
+  const onDrop = useCallback(
+      async (acceptedFiles: File[]) => {
+        setFiles(acceptedFiles);
+      })
 
   return (
     <div {...getRootProps()} className='cursor-pointer'>
@@ -31,6 +31,14 @@ const FileUploader = ({ownerId, accountId, className}: Props) => {
         <h4 className='h4 text-light-100'>Uploading</h4>
         {files.map((file, index) => {
           const { type, extension } = getFileType(file.name);
+
+          return (
+            <li
+            key={`${file.name}-${index}`}
+            className='uploader-preview-item'>
+
+            </li>
+          )
         })}
       </ul>
       }
