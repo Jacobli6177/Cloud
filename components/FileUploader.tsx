@@ -3,8 +3,9 @@
 import React, {useCallback, useState} from 'react'
 import {useDropzone} from 'react-dropzone'
 import { Button } from './ui/button';
-import { cn, getFileType } from '@/lib/utils';
+import { cn, convertFileToUrl, getFileType } from '@/lib/utils';
 import Image from 'next/image';
+import Thumbnail from './Thumbnail';
 
 interface Props {
   ownerId: string,
@@ -17,7 +18,7 @@ const FileUploader = ({ownerId, accountId, className}: Props) => {
   const onDrop = useCallback(
       async (acceptedFiles: File[]) => {
         setFiles(acceptedFiles);
-      })
+      }, [])
 
   return (
     <div {...getRootProps()} className='cursor-pointer'>
@@ -36,7 +37,13 @@ const FileUploader = ({ownerId, accountId, className}: Props) => {
             <li
             key={`${file.name}-${index}`}
             className='uploader-preview-item'>
-
+              <div> 
+                <Thumbnail 
+                  type={type}
+                  extension={extension}
+                  url={convertFileToUrl(file)}
+                />
+              </div>
             </li>
           )
         })}
