@@ -4,7 +4,8 @@ import { createAdminClient } from "@/appwrite";
 import { appwriteConfig } from "@/appwrite/config";
 import { ID } from "node-appwrite";
 import { InputFile } from "node-appwrite/file";
-import { constructFileUrl, getFileType } from "../utils";
+import { constructFileUrl, getFileType, parseStringify } from "../utils";
+import { revalidatePath } from "next/cache";
 
 
 const handleError = (error: unknown, message:string) => {
@@ -44,7 +45,10 @@ export const uploadFile = async ({file, ownerId, accountId, path}: UploadFilePro
         .catch(async (error: unknown) => {
             await storage.deleteFile(appwriteConfig.bucketId, bucketFile.$id);
             handleError(error, "Failed to create file document")
-        })
+        });
+
+        revalidatePath(path);
+        return parseStringify(newFile);
     } catch(error) {
         handleError(error, "Failed to upload message")
     }
