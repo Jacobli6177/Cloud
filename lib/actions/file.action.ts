@@ -1,7 +1,7 @@
 'use server';
 
-import { createAdminClient } from "@/appwrite";
-import { appwriteConfig } from "@/appwrite/config";
+import { createAdminClient } from "@/lib/appwrite";
+import { appwriteConfig } from "@/lib/appwrite/config";
 import { ID } from "node-appwrite";
 import { InputFile } from "node-appwrite/file";
 import { constructFileUrl, getFileType, parseStringify } from "../utils";
