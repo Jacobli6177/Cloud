@@ -53,3 +53,13 @@ export const uploadFile = async ({file, ownerId, accountId, path}: UploadFilePro
         handleError(error, "Failed to upload message")
     }
 }
+
+export const getFiles = async () => {
+    const { databases } = await createAdminClient();
+
+    try {
+        
+    } catch (error) {
+        handleError(error, "Failed to get File")
+    }
+}
