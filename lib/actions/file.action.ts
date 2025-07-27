@@ -2,7 +2,7 @@
 
 import { createAdminClient } from "@/lib/appwrite";
 import { appwriteConfig } from "@/lib/appwrite/config";
-import { ID, Query } from "node-appwrite";
+import { ID, Models, Query } from "node-appwrite";
 import { InputFile } from "node-appwrite/file";
 import { constructFileUrl, getFileType, parseStringify } from "../utils";
 import { revalidatePath } from "next/cache";
@@ -14,13 +14,14 @@ const handleError = (error: unknown, message:string) => {
     throw error
 }
 
-const createQueries = (currentUser: any) => {
+const createQueries = (currentUser: Models.Document) => {
     const queries = [
         Query.or([
             Query.equal('owners',[currentUser.$id]),
-            Query.equal('user',[currentUser.email])
-        ])
-    ]
+            Query.contains('user',[currentUser.email])
+        ]),
+    ];
+    return queries
 }
 
 export const uploadFile = async ({file, ownerId, accountId, path}: UploadFileProps) => {
@@ -75,6 +76,13 @@ export const getFiles = async () => {
         if(!CurrentUser) throw new Error("user not found");
 
         const queries = createQueries(CurrentUser);
+
+        const file = await databases.listDocuments(
+            appwriteConfig.databaseId,
+            appwriteConfig.filesCollectionId,
+            queries,
+        );
+        return parseStringify(file)
 
     } catch (error) {
         handleError(error, "Failed to get File")
