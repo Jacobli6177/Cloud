@@ -23,7 +23,10 @@ const Card = ({ file }: {file: Models.Document}) => {
             <p className='subtitle-2 line-clamp-1'> 
                 {file.name}
             </p>
-            <FormattedDateTime />
+            <FormattedDateTime
+                date={file.$createdAt}
+                className="body-2 text-light-100"
+        />
         </div>
     </Link>
   )
