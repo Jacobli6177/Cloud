@@ -12,11 +12,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import Image from 'next/image';
+import { Models } from 'node-appwrite';
+import { actionsDropdownItems } from '@/constants';
+import Link from 'next/link';
+import { constructDownloadUrl } from '@/lib/utils';
 
 
-const ActionDropdown = () => {
+const ActionDropdown = ({ file }: {file: Models.Document }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [action, setAction] = useState<ActionType | null>(null)
 
   return (
     <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
@@ -29,10 +34,28 @@ const ActionDropdown = () => {
             {file.name}
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>Profile</DropdownMenuItem>
-          <DropdownMenuItem>Billing</DropdownMenuItem>
-          <DropdownMenuItem>Team</DropdownMenuItem>
-          <DropdownMenuItem>Subscription</DropdownMenuItem>
+            {actionsDropdownItems.map((actionItem) => (
+              <DropdownMenuItem key={actionItem.value} 
+              className="shad-dropdown-item" 
+              onClick={() => {
+                setAction(actionItem);
+
+                if (
+                  [
+                    "rename",
+                    "share",
+                    "delete",
+                    "details"]
+                    .includes(actionItem.value,
+                    )
+                ) {
+                  setIsModalOpen(true);
+                }
+                
+              }}>
+                <Link href={constructDownloadUrl(file.bucketFiled)} />
+              </DropdownMenuItem>
+            ))}
         </DropdownMenuContent>
       </DropdownMenu>
   </Dialog>
