@@ -29,6 +29,15 @@ const ActionDropdown = ({ file }: {file: Models.Document }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [action, setAction] = useState<ActionType | null>(null)
   const [name, setName] = useState(file.name)
+  const [isLoading, setisLoading] = useState(false);
+
+  const closeAllModals = () => {
+    setIsModalOpen(false);
+    setIsDropdownOpen(false);
+    setAction(null);
+    setName(file.name);
+  }
+
   const renderDialogContent = () => {
     if(!action) return null;
 
@@ -51,6 +60,13 @@ const ActionDropdown = ({ file }: {file: Models.Document }) => {
             </Button>
             <Button>
               <p className='capitalize'>{value}</p>
+              {isLoading && (
+                <Image src="/assets/icons/loader.svg" 
+                alt='loader' 
+                width={24} 
+                height={24} 
+                className='animate-spin'/>
+              )}
             </Button>
           </DialogFooter>
         )}
@@ -116,7 +132,7 @@ const ActionDropdown = ({ file }: {file: Models.Document }) => {
           ))}
         </DropdownMenuContent>
       </DropdownMenu>
-      {renderDialogContent}
+      {renderDialogContent()}
   </Dialog>
   )
 }
