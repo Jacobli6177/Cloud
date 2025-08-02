@@ -40,7 +40,7 @@ const ActionDropdown = ({ file }: {file: Models.Document }) => {
   }
 
   const handleAction = async () => {
-    
+
   }
 
   const renderDialogContent = () => {
@@ -60,10 +60,10 @@ const ActionDropdown = ({ file }: {file: Models.Document }) => {
         </DialogHeader>
         {['rename', 'delete', 'share'].includes(value) && (
           <DialogFooter className='flex flex-col gap-3 md:flex-row'>
-            <Button>
+            <Button onClick={closeAllModals} className='modal-cancel-button'>
               Cancel
             </Button>
-            <Button>
+            <Button onClick={handleAction} className='modal-submit-button'>
               <p className='capitalize'>{value}</p>
               {isLoading && (
                 <Image src="/assets/icons/loader.svg" 
