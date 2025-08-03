@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from 'react'
+import React, { act, useState } from 'react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -47,11 +47,15 @@ const ActionDropdown = ({ file }: {file: Models.Document }) => {
     setisLoading(true);
     let success = false;
 
-    const action = {
+    const actions = {
       rename: () => renameFile({ fileId: file.$id, name, extension: file.extension, path}),
       share: () => console.log("share"),
       delete: () => console.log("delete")
     }
+    success = await actions[action.value as keyof typeof actions]();
+
+    if(success) closeAllModals();
+    setisLoading(false)
   }
 
   const renderDialogContent = () => {
