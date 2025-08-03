@@ -89,7 +89,7 @@ export const getFiles = async () => {
     }
 }
 
-const renameFile = async({ fileId, name, extension, path}: RenameFileProps) => {
+export const renameFile = async({ fileId, name, extension, path}: RenameFileProps) => {
     const { databases} = await createAdminClient();
 
     try {
@@ -102,6 +102,9 @@ const renameFile = async({ fileId, name, extension, path}: RenameFileProps) => {
             name: newName,
         },
     );
+
+    revalidatePath(path)
+    return parseStringify(updatedFile);
     } catch (error) {
         handleError(error, "Failed to rename file")
     }
