@@ -34,3 +34,14 @@ export const FileDetails = ({ file }: { file: Models.Document }) => {
     </>
   );
 };
+
+
+interface Props {
+  file: Models.Document;
+  onInputChange: React.Dispatch<React.SetStateAction<string[]>>;
+  onRemove: (email: string) => void;
+}
+
+export const ShareInput = ({ file, onInputChange, onRemove }: { file: Models.Document }) => {
+
+}
