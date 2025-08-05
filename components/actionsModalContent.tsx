@@ -55,6 +55,20 @@ export const ShareInput = ({ file, onInputChange, onRemove }: Props) => {
       placeholder='Enter email address' 
       onChange={(e) => onInputChange(e.target.value.trim().split(","))} 
       className='share-input-field' />
+      <div className='pt-4'>
+        <p className='subtitle-2 text-light-100'>Shared with</p>
+        <p>
+          {file.users.length} users
+        </p>
+      </div>
+
+      <ul className='pt-2'>
+        {file.users.map((email: string) => (
+          <li>
+            
+          </li>
+        ))}
+      </ul>
     </div>
   </>
   )
