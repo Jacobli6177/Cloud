@@ -24,8 +24,7 @@ import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { renameFile } from '@/lib/actions/file.action';
 import { usePathname } from 'next/navigation';
-import { FileDetails } from './actionsModalContent';
-import ShareInput from './ShareInput';
+import { FileDetails, ShareInput} from './actionsModalContent';
 
 
 const ActionDropdown = ({ file }: {file: Models.Document }) => {

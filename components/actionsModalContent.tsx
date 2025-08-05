@@ -3,6 +3,7 @@ import React from 'react'
 import Thumbnail from './Thumbnail'
 import FormattedDateTime from './FormattedDateTime'
 import { convertFileSize, formatDateTime } from '@/lib/utils'
+import { Input } from './ui/input'
 
 const ImageThumbnail = ({ file }: { file: Models.Document }) => (
   <div className="file-details-thumbnail">
@@ -42,6 +43,19 @@ interface Props {
   onRemove: (email: string) => void;
 }
 
-export const ShareInput = ({ file, onInputChange, onRemove }: { file: Models.Document }) => {
-
+export const ShareInput = ({ file, onInputChange, onRemove }: Props) => {
+  return (
+  <>
+    <ImageThumbnail file={file}/>
+    <div className='share-wrapper'>
+      <p className='subtitle-2 pl-1 text-light-100'>
+        Share file with other users
+      </p>
+      <Input type='email' 
+      placeholder='Enter email address' 
+      onChange={(e) => onInputChange(e.target.value.trim().split(","))} 
+      className='share-input-field' />
+    </div>
+  </>
+  )
 }
