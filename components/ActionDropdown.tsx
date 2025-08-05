@@ -34,7 +34,7 @@ const ActionDropdown = ({ file }: {file: Models.Document }) => {
   const [name, setName] = useState(file.name)
   const [isLoading, setisLoading] = useState(false);
   const path = usePathname();
-  const [email, setEmail] = useState([])
+  const [emails, setEmails] = useState<string[]>([]);
 
   const closeAllModals = () => {
     setIsModalOpen(false);
@@ -60,7 +60,9 @@ const ActionDropdown = ({ file }: {file: Models.Document }) => {
     setisLoading(false)
   }
 
-  const handleRemoveUser
+  const handleRemoveUser = async(email: string) => {
+
+  }
 
   const renderDialogContent = () => {
     if(!action) return null;
@@ -78,7 +80,7 @@ const ActionDropdown = ({ file }: {file: Models.Document }) => {
           )}
           {value === 'details' && <FileDetails file={file} />}
           {value === 'share' && (
-            <ShareInput file={file} onInputChange = {setEmail} onRemove={handleRemoveUser}/>
+            <ShareInput file={file} onInputChange = {setEmails} onRemove={handleRemoveUser}/>
           )}
         </DialogHeader>
         {['rename', 'delete', 'share'].includes(value) && (
