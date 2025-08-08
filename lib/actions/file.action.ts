@@ -67,27 +67,33 @@ export const uploadFile = async ({file, ownerId, accountId, path}: UploadFilePro
 
 
 
-export const getFiles = async () => {
-    const { databases } = await createAdminClient();
+export const getFiles = async ({
+  types = [],
+  searchText = "",
+  sort = "$createdAt-desc",
+  limit,
+}: GetFilesProps) => {
+  const { databases } = await createAdminClient();
 
-    try {
-        const CurrentUser = await getCurrentUser();
+  try {
+    const currentUser = await getCurrentUser();
 
-        if(!CurrentUser) throw new Error("user not found");
+    if (!currentUser) throw new Error("User not found");
 
-        const queries = createQueries(CurrentUser);
+    const queries = createQueries(currentUser, types, searchText, sort, limit);
 
-        const file = await databases.listDocuments(
-            appwriteConfig.databaseId,
-            appwriteConfig.filesCollectionId,
-            queries,
-        );
-        return parseStringify(file)
+    const files = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.filesCollectionId,
+      queries,
+    );
 
-    } catch (error) {
-        handleError(error, "Failed to get File")
-    }
-}
+    console.log({ files });
+    return parseStringify(files);
+  } catch (error) {
+    handleError(error, "Failed to get files");
+  }
+};
 
 export const renameFile = async({ fileId, name, extension, path}: RenameFileProps) => {
     const { databases} = await createAdminClient();
