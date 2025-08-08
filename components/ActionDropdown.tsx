@@ -52,7 +52,8 @@ const ActionDropdown = ({ file }: {file: Models.Document }) => {
     const actions = {
       rename: () => renameFile({ fileId: file.$id, name, extension: file.extension, path}),
       share: () => updateFileUsers({ fileId: file.$id, emails, path}),
-      delete: () => deleteFile()
+      delete: () =>
+        deleteFile({ fileId: file.$id, bucketFileId: file.bucketFileId, path }),
     }
     success = await actions[action.value as keyof typeof actions]();
 
