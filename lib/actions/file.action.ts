@@ -14,13 +14,15 @@ const handleError = (error: unknown, message:string) => {
     throw error
 }
 
-const createQueries = (currentUser: Models.Document) => {
+const createQueries = (currentUser: Models.Document, types:string[]) => {
     const queries = [
         Query.or([
             Query.equal('owners',[currentUser.$id]),
             Query.contains('user',[currentUser.email])
         ]),
     ];
+if (types.length > 0) queries.push(Query.equal('type', types));
+
     return queries
 }
 
@@ -64,8 +66,6 @@ export const uploadFile = async ({file, ownerId, accountId, path}: UploadFilePro
         handleError(error, "Failed to upload message")
     }
 }
-
-
 
 export const getFiles = async ({
   types = [],
