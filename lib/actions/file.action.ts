@@ -14,15 +14,16 @@ const handleError = (error: unknown, message:string) => {
     throw error
 }
 
-const createQueries = (currentUser: Models.Document, types:string[]) => {
+const createQueries = (currentUser: Models.Document, types:string[], searchText: string, sort: string, limit?: number,) => {
     const queries = [
         Query.or([
             Query.equal('owners',[currentUser.$id]),
             Query.contains('user',[currentUser.email])
         ]),
     ];
-if (types.length > 0) queries.push(Query.equal('type', types));
-
+  if (types.length > 0) queries.push(Query.equal('type', types));
+  if (searchText) queries.push(Query.contains("name", searchText));
+  if (limit) queries.push(Query.limit(limit));
     return queries
 }
 
