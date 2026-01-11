@@ -9,14 +9,14 @@ import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/actions/user.actions";
 
 const handleError = (error: unknown, message: string) => {
-  console.log(error, message);
+  console.log(message, error);
   throw error;
 };
 
 export const uploadFile = async ({
   file,
-  ownerId,
-  accountId,
+  ownerId,   // kept for compatibility, but we won't store it as "owner"
+  accountId, // input param name kept for compatibility
   path,
 }: UploadFileProps) => {
   const { storage, databases } = await createAdminClient();
@@ -27,27 +27,26 @@ export const uploadFile = async ({
     const bucketFile = await storage.createFile(
       appwriteConfig.bucketId,
       ID.unique(),
-      inputFile,
+      inputFile
     );
 
-    const fileDocument = {
-      type: getFileType(bucketFile.name).type,
-      name: bucketFile.name,
-      url: constructFileUrl(bucketFile.$id),
-      extension: getFileType(bucketFile.name).extension,
-      size: bucketFile.sizeOriginal,
-      owner: ownerId,
-      accountId,
-      users: [],
-      bucketFileId: bucketFile.$id,
-    };
+  const fileDocument = {
+    type: getFileType(bucketFile.name).type,
+    name: bucketFile.name,
+    url: constructFileUrl(bucketFile.$id),
+    // ✅ removed extension because your schema doesn't allow it
+    size: bucketFile.sizeOriginal,
+    accountID: accountId ?? ownerId,
+    users: [],
+    bucketFileId: bucketFile.$id,
+  };
 
     const newFile = await databases
       .createDocument(
         appwriteConfig.databaseId,
         appwriteConfig.filesCollectionId,
         ID.unique(),
-        fileDocument,
+        fileDocument
       )
       .catch(async (error: unknown) => {
         await storage.deleteFile(appwriteConfig.bucketId, bucketFile.$id);
@@ -66,11 +65,12 @@ const createQueries = (
   types: string[],
   searchText: string,
   sort: string,
-  limit?: number,
+  limit?: number
 ) => {
   const queries = [
     Query.or([
-      Query.equal("owner", [currentUser.$id]),
+      // ✅ FIX: query by accountID, not owner
+      Query.equal("accountID", [currentUser.$id]),
       Query.contains("users", [currentUser.email]),
     ]),
   ];
@@ -82,9 +82,7 @@ const createQueries = (
   if (sort) {
     const [sortBy, orderBy] = sort.split("-");
 
-    queries.push(
-      orderBy === "asc" ? Query.orderAsc(sortBy) : Query.orderDesc(sortBy),
-    );
+    queries.push(orderBy === "asc" ? Query.orderAsc(sortBy) : Query.orderDesc(sortBy));
   }
 
   return queries;
@@ -100,7 +98,6 @@ export const getFiles = async ({
 
   try {
     const currentUser = await getCurrentUser();
-
     if (!currentUser) throw new Error("User not found");
 
     const queries = createQueries(currentUser, types, searchText, sort, limit);
@@ -108,10 +105,9 @@ export const getFiles = async ({
     const files = await databases.listDocuments(
       appwriteConfig.databaseId,
       appwriteConfig.filesCollectionId,
-      queries,
+      queries
     );
 
-    console.log({ files });
     return parseStringify(files);
   } catch (error) {
     handleError(error, "Failed to get files");
@@ -132,9 +128,7 @@ export const renameFile = async ({
       appwriteConfig.databaseId,
       appwriteConfig.filesCollectionId,
       fileId,
-      {
-        name: newName,
-      },
+      { name: newName }
     );
 
     revalidatePath(path);
@@ -156,15 +150,13 @@ export const updateFileUsers = async ({
       appwriteConfig.databaseId,
       appwriteConfig.filesCollectionId,
       fileId,
-      {
-        users: emails,
-      },
+      { users: emails }
     );
 
     revalidatePath(path);
     return parseStringify(updatedFile);
   } catch (error) {
-    handleError(error, "Failed to rename file");
+    handleError(error, "Failed to update file users");
   }
 };
 
@@ -179,7 +171,7 @@ export const deleteFile = async ({
     const deletedFile = await databases.deleteDocument(
       appwriteConfig.databaseId,
       appwriteConfig.filesCollectionId,
-      fileId,
+      fileId
     );
 
     if (deletedFile) {
@@ -189,6 +181,6 @@ export const deleteFile = async ({
     revalidatePath(path);
     return parseStringify({ status: "success" });
   } catch (error) {
-    handleError(error, "Failed to rename file");
+    handleError(error, "Failed to delete file");
   }
 };

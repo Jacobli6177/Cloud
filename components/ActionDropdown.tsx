@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from './ui/input';
 import { Button } from './ui/button';
-import { deleteFile, renameFile, updateFileUsers } from '@/lib/actions/file.action';
+import { deleteFile, renameFile, updateFileUsers } from '@/lib/actions/file.actions';
 import { usePathname } from 'next/navigation';
 import { FileDetails, ShareInput} from './actionsModalContent';
 

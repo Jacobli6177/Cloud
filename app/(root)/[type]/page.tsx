@@ -1,6 +1,6 @@
 import React from "react";
 import Sort from "@/components/Sort";
-import { getFiles } from "@/lib/actions/file.action";
+import { getFiles } from "@/lib/actions/file.actions";
 import { Models } from "node-appwrite";
 import { getFileTypesParams } from "@/lib/utils";
 import Card from "@/components/Card";

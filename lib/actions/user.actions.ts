@@ -14,14 +14,14 @@ const getUserByEmail = async (email: string) => {
   const result = await databases.listDocuments(
     appwriteConfig.databaseId,
     appwriteConfig.usersCollectionId,
-    [Query.equal("email", [email])],
+    [Query.equal("email", [email])]
   );
 
   return result.total > 0 ? result.documents[0] : null;
 };
 
 const handleError = (error: unknown, message: string) => {
-  console.log(error, message);
+  console.log(message, error);
   throw error;
 };
 
@@ -30,7 +30,7 @@ export const sendEmailOTP = async ({ email }: { email: string }) => {
 
   try {
     const session = await account.createEmailToken(ID.unique(), email);
-
+    // For email-token auth, Appwrite returns a userId that you use with createSession(userId, secret)
     return session.userId;
   } catch (error) {
     handleError(error, "Failed to send email OTP");
@@ -46,9 +46,11 @@ export const createAccount = async ({
 }) => {
   const existingUser = await getUserByEmail(email);
 
+  // Always send OTP and use its userId as the accountId to verify
   const accountId = await sendEmailOTP({ email });
   if (!accountId) throw new Error("Failed to send an OTP");
 
+  // If user profile doc doesn't exist yet, create it
   if (!existingUser) {
     const { databases } = await createAdminClient();
 
@@ -60,11 +62,13 @@ export const createAccount = async ({
         fullName,
         email,
         avatar: avatarPlaceholderUrl,
-        accountId,
-      },
+        // ✅ Match your Appwrite collection attribute name exactly (case-sensitive)
+        accountID: accountId,
+      }
     );
   }
 
+  // ✅ Return the OTP userId for the client to verify (NOT existingUser?.accountID)
   return parseStringify({ accountId });
 };
 
@@ -84,7 +88,8 @@ export const verifySecret = async ({
       path: "/",
       httpOnly: true,
       sameSite: "strict",
-      secure: true,
+      // ✅ Don't force secure cookies on localhost (http)
+      secure: process.env.NODE_ENV === "production",
     });
 
     return parseStringify({ sessionId: session.$id });
@@ -102,7 +107,8 @@ export const getCurrentUser = async () => {
     const user = await databases.listDocuments(
       appwriteConfig.databaseId,
       appwriteConfig.usersCollectionId,
-      [Query.equal("accountId", result.$id)],
+      // ✅ Match schema field name exactly
+      [Query.equal("accountID", result.$id)]
     );
 
     if (user.total <= 0) return null;
@@ -110,6 +116,7 @@ export const getCurrentUser = async () => {
     return parseStringify(user.documents[0]);
   } catch (error) {
     console.log(error);
+    return null;
   }
 };
 
@@ -133,7 +140,9 @@ export const signInUser = async ({ email }: { email: string }) => {
     // User exists, send OTP
     if (existingUser) {
       await sendEmailOTP({ email });
-      return parseStringify({ accountId: existingUser.accountId });
+
+      // ✅ Your stored field is accountID (capital D)
+      return parseStringify({ accountId: existingUser.accountID });
     }
 
     return parseStringify({ accountId: null, error: "User not found" });

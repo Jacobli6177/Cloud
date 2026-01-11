@@ -10,7 +10,7 @@ import Thumbnail from "@/components/Thumbnail";
 import { MAX_FILE_SIZE } from "@/constants";
 import { useToast } from "@/hooks/use-toast";
 import { usePathname } from "next/navigation";
-import { uploadFile } from "@/lib/actions/file.action";
+import { uploadFile } from "@/lib/actions/file.actions";
 
 interface Props {
   ownerId: string;
