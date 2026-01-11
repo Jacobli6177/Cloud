@@ -1,6 +1,6 @@
 "use server";
 
-import { createAdminClient } from "@/lib/appwrite";
+import { createAdminClient, createSessionClient } from "@/lib/appwrite";
 import { InputFile } from "node-appwrite/file";
 import { appwriteConfig } from "@/lib/appwrite/config";
 import { ID, Models, Query } from "node-appwrite";
@@ -15,8 +15,8 @@ const handleError = (error: unknown, message: string) => {
 
 export const uploadFile = async ({
   file,
-  ownerId,   // kept for compatibility, but we won't store it as "owner"
-  accountId, // input param name kept for compatibility
+  ownerId,
+  accountId,
   path,
 }: UploadFileProps) => {
   const { storage, databases } = await createAdminClient();
@@ -30,16 +30,19 @@ export const uploadFile = async ({
       inputFile
     );
 
-  const fileDocument = {
-    type: getFileType(bucketFile.name).type,
-    name: bucketFile.name,
-    url: constructFileUrl(bucketFile.$id),
-    // ✅ removed extension because your schema doesn't allow it
-    size: bucketFile.sizeOriginal,
-    accountID: accountId ?? ownerId,
-    users: [],
-    bucketFileId: bucketFile.$id,
-  };
+    const fileDocument = {
+      type: getFileType(bucketFile.name).type,
+      name: bucketFile.name,
+      url: constructFileUrl(bucketFile.$id),
+      // ✅ removed extension because your Files schema doesn't have it
+      size: bucketFile.sizeOriginal,
+
+      // ✅ FIX: use accountID (case-sensitive) instead of owner/accountId
+      accountID: accountId ?? ownerId,
+
+      users: [],
+      bucketFileId: bucketFile.$id,
+    };
 
     const newFile = await databases
       .createDocument(
@@ -69,7 +72,7 @@ const createQueries = (
 ) => {
   const queries = [
     Query.or([
-      // ✅ FIX: query by accountID, not owner
+      // ✅ FIX: use accountID instead of owner
       Query.equal("accountID", [currentUser.$id]),
       Query.contains("users", [currentUser.email]),
     ]),
@@ -81,7 +84,6 @@ const createQueries = (
 
   if (sort) {
     const [sortBy, orderBy] = sort.split("-");
-
     queries.push(orderBy === "asc" ? Query.orderAsc(sortBy) : Query.orderDesc(sortBy));
   }
 
@@ -184,3 +186,46 @@ export const deleteFile = async ({
     handleError(error, "Failed to delete file");
   }
 };
+
+// ============================== TOTAL FILE SPACE USED
+export async function getTotalSpaceUsed() {
+  try {
+    const { databases } = await createSessionClient();
+    const currentUser = await getCurrentUser();
+    if (!currentUser) throw new Error("User is not authenticated.");
+
+    const files = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.filesCollectionId,
+      // ✅ FIX: accountID instead of owner
+      [Query.equal("accountID", [currentUser.$id])]
+    );
+
+    const totalSpace = {
+      image: { size: 0, latestDate: "" },
+      document: { size: 0, latestDate: "" },
+      video: { size: 0, latestDate: "" },
+      audio: { size: 0, latestDate: "" },
+      other: { size: 0, latestDate: "" },
+      used: 0,
+      all: 2 * 1024 * 1024 * 1024 /* 2GB available bucket storage */,
+    };
+
+    files.documents.forEach((file: any) => {
+      const fileType = (file.type as FileType) ?? "other";
+      totalSpace[fileType].size += file.size ?? 0;
+      totalSpace.used += file.size ?? 0;
+
+      if (
+        !totalSpace[fileType].latestDate ||
+        new Date(file.$updatedAt) > new Date(totalSpace[fileType].latestDate)
+      ) {
+        totalSpace[fileType].latestDate = file.$updatedAt;
+      }
+    });
+
+    return parseStringify(totalSpace);
+  } catch (error) {
+    handleError(error, "Error calculating total space used");
+  }
+}
